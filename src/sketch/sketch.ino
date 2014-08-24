@@ -2,8 +2,6 @@ int motor_A=5;
 int motor_B=6;
 int motor_Speed=3;
 int throttleIn=0;
-int throttle=0;
-int powerSwitch=0;
 int switchIn=5;
 int currentSpeed=0;
 int direction=1;
@@ -39,8 +37,8 @@ int readShiftStick() {
 }
 
 void loop() {
-  powerSwitch = analogRead(switchIn) < 512 ? 0 : 1;
-  throttle = analogRead(throttleIn);
+  int powerSwitch = analogRead(switchIn) < 512 ? 0 : 1;
+  int throttle = analogRead(throttleIn);
   int speed = map(throttle, 0, 1023, 0, 255);
   direction = readShiftStick(); // +1 or -1
 
