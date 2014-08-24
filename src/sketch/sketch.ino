@@ -5,6 +5,10 @@ int throttleIn=0;
 int throttle=0;
 int powerSwitch=0;
 int switchIn=5;
+int currentSpeed=0;
+int direction=1;
+int acceleration=10;
+int brakeSpeed=20;
 
 void setup() {
   Serial.begin(9600);
@@ -12,31 +16,40 @@ void setup() {
   pinMode(motor_B, OUTPUT);
 }
 
-void setSpeed(int throttle) {
-  int speed = map(throttle, 0, 511, 0, 255);
+int setSpeed(int speed) {
+  int newSpeed = constrain(0, currentSpeed + acceleration, speed);
   analogWrite(motor_Speed, speed);
+  return newSpeed;
 }
 
-void forward(int throttle) {
+int forward(int speed) {
   digitalWrite(motor_A, HIGH);
   digitalWrite(motor_B, LOW);
-  setSpeed(throttle);
+  return setSpeed(speed);
 }
 
-void backward(int throttle) {
+int backward(int speed) {
   digitalWrite(motor_A, LOW);
   digitalWrite(motor_B, HIGH);
-  setSpeed(throttle);
+  return setSpeed(speed);
+}
+
+int readShiftStick() {
+  return 1;
 }
 
 void loop() {
   powerSwitch = analogRead(switchIn) < 512 ? 0 : 1;
-  throttle = analogRead(throttleIn) - 512;
+  throttle = analogRead(throttleIn);
+  int speed = map(throttle, 0, 1023, 0, 255);
+  direction = readShiftStick(); // +1 or -1
 
-  if (!powerSwitch)
-    setSpeed(0);
-  else if (throttle <= 0)
-    backward(throttle * -1);
-  else
-    forward(throttle);
+  if (!powerSwitch) {
+    currentSpeed = setSpeed(speed - brakeSpeed);
+  }
+  else {
+    currentSpeed = direction ?
+                     forward(throttle) :
+                     backward(throttle);
+  }
 }
