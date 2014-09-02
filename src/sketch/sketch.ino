@@ -14,6 +14,8 @@ void setup() {
   Serial.begin(9600);
   pinMode(motor_A, OUTPUT);
   pinMode(motor_B, OUTPUT);
+  digitalWrite(motor_A, HIGH);
+  digitalWrite(motor_B, LOW);
 }
 
 int setSpeed(int delta) {
@@ -27,18 +29,26 @@ int setSpeed(int delta) {
 int readShiftStick() {
   int f = !analogRead(forwardStickPin);
   int r = !analogRead(reverseStickPin);
+  bool bothOff = !(f | r);
+  Serial.print(f);
+  Serial.print("/");
+  Serial.print(r);
+  Serial.print(" , ");
+  Serial.print(bothOff);
 
-  reverseOrForward = f ? 1 : 0;
-
-  digitalWrite(motor_A, reverseOrForward ? HIGH : LOW);
-  digitalWrite(motor_B, reverseOrForward ? LOW : HIGH);
+  int newReverseOrForward = bothOff ? reverseOrForward : f ? 1 : 0;
+  return reverseOrForward ^ newReverseOrForward  && currentSpeed == 0 ? newReverseOrForward : reverseOrForward;
 }
 
 void loop() {
   int powerSwitch = ! analogRead(switchIn);
-  readShiftStick();
+  reverseOrForward = readShiftStick();
+
+  digitalWrite(motor_A, reverseOrForward ? HIGH : LOW);
+  digitalWrite(motor_B, reverseOrForward ? LOW : HIGH);
 
   currentSpeed = setSpeed(powerSwitch ? acceleration : brakeSpeed);
+  Serial.println(reverseOrForward);
 
   delay(currentSpeed == 0 ? 300 : 10);
 }
