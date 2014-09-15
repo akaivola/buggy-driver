@@ -6,8 +6,8 @@ int currentSpeed=0;
 int acceleration=1;
 int brakeSpeed=-5;
 
-int forwardStickPin=4;
-int reverseStickPin=5;
+int forwardStickPin=3;
+int reverseStickPin=2;
 int reverseOrForward=1;
 
 void setup() {
